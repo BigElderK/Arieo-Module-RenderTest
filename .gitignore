@@ -1,0 +1,97 @@
+# ---> C++
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+# *.obj
+    
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Generated VS Stuido files.
+.vscode/
+.vs/
+*.sln
+
+# Generated source files.
+*.gen.cpp
+*.generated.*
+
+# Generated
+conan/_generated
+**/_generated
+
+# Downloaded
+.downloads
+
+# Python
+__pycache__/
+*.pyc
+
+# Ignore everything in 01_third_parties/conan/recipes/ except conanfile.py in second level folders
+01_third_parties/conan/recipes/*
+01_third_parties/conan/recipes/*/**
+!01_third_parties/conan/recipes/*/
+!01_third_parties/conan/recipes/*/conanfile.py
+
+# Testing folders
+.test
+
+# Generated CMake files.
+_build/
+_output/
+output/
+build/
+/lib/
+bin/
+3rdparties/*/
+CMakeCache.txt
+CMakeFiles/
+_generated/
+obj/
+.output
+.conan
+.conan_short
+CMakeUserPresets.json
+
+# Package management
+/packages
+
+# Clangd cache folder
+.cache
+.temp
+
+# GO home dir
+go/
+
+# log files
+*.log
+
+.gradle/
+**/.gradle/
+
+**/.cxx

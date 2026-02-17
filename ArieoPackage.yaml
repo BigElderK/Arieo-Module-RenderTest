@@ -1,0 +1,21 @@
+category: 02_engine
+name: Arieo-Module-RenderTest
+description: Render Test module implementation
+
+build_folder: ${ARIEO_PACKAGE_BUILD_FOLDER}/${ARIEO_PACKAGE_CATEGORY}/${ARIEO_PACKAGE_NAME}/${CMAKE_CONFIGURE_PRESET}
+install_folder: ${ARIEO_PACKAGE_INSTALL_FOLDER}/${ARIEO_PACKAGE_CATEGORY}/${ARIEO_PACKAGE_NAME}/${CMAKE_CONFIGURE_PRESET}
+
+cmake_presets_file: $ENV{ARIEO_BUILDENV_PACKAGE_INSTALL_FOLDER}/cmake/CMakePresets.json
+build_commands:
+- ${CMAKE_COMMAND} --build .
+install_commands:
+- ${CMAKE_COMMAND} --build . --target install
+
+dependencies:
+  packages:
+  - git_url: https://github.com/BigElderK/Arieo-BuildEnv.git
+    tag: main
+  - git_url: https://github.com/BigElderK/Arieo-Core.git
+    tag: main
+  - git_url: https://github.com/BigElderK/Arieo-Interface-Window.git
+    tag: main
