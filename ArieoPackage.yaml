@@ -17,5 +17,13 @@ dependencies:
     tag: main
   - git_url: https://github.com/BigElderK/Arieo-Core.git
     tag: main
+  - git_url: https://github.com/BigElderK/Arieo-Interface-RHI.git
+    tag: main
   - git_url: https://github.com/BigElderK/Arieo-Interface-Window.git
+    tag: main
+  - git_url: https://github.com/BigElderK/Arieo-Interface-Archive.git
+    tag: main
+  - git_url: https://github.com/BigElderK/Arieo-Interface-FileLoader.git
+    tag: main
+  - git_url: https://github.com/BigElderK/Arieo-Interface-Main.git
     tag: main

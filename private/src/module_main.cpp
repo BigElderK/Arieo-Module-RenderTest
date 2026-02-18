@@ -17,6 +17,16 @@ namespace Arieo
         Interface::FileLoader::IImageLoader* image_loader = Core::ModuleManager::getInterface<Interface::FileLoader::IImageLoader>();
         Interface::FileLoader::IModelLoader* model_loader = Core::ModuleManager::getInterface<Interface::FileLoader::IModelLoader>();
 
+        co_yield Core::Coroutine::YieldUntil([&]() -> bool
+        {
+            Core::Logger::trace("Waiting for required interfaces...");
+            return main_module != nullptr 
+                && window_manager != nullptr 
+                && render_instance != nullptr
+                && image_loader != nullptr
+                && model_loader != nullptr;
+        });
+
         // initialize
         Interface::Window::IWindow* window = nullptr;
         Interface::Archive::IArchive* content_archive = nullptr;

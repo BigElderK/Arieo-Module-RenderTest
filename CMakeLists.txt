@@ -8,14 +8,16 @@ arieo_engine_project(
     PROJECT_TYPE module
 
     PACKAGES
-        Arieo-Interface-Sample
         Arieo-Core
+        Arieo-Interface-RHI
+        Arieo-Interface-Archive
+        Arieo-Interface-FileLoader
+        Arieo-Interface-Main
     INTERFACES
-        Arieo-Interface-Sample::arieo_sample_interface
-        Arieo-Interface-RHI::arieo_interface_rhi
-        Arieo-Interface-Archive::arieo_interface_archive
-        Arieo-Interface-FileLoader::arieo_interface_file_loader
-        Arieo-Interface-Main::arieo_interface_main
+        Arieo-Interface-RHI::arieo_rhi_interface
+        Arieo-Interface-Archive::arieo_archive_interface
+        Arieo-Interface-FileLoader::arieo_file_loader_interface
+        Arieo-Interface-Main::arieo_main_interface
     PRIVATE_LIBS
         Arieo-Core::arieo_core
 
