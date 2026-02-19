@@ -8,9 +8,10 @@ arieo_engine_project(
     PROJECT_TYPE module
 
     DEPENDENCIES
-        PACKAGES
+        ARIEO_PACKAGES
             Arieo-Core
             Arieo-Interface-RHI
+            Arieo-Interface-Window
             Arieo-Interface-Archive
             Arieo-Interface-FileLoader
             Arieo-Interface-Main
@@ -24,6 +25,6 @@ arieo_engine_project(
 
     SOURCES
         CXX_SOURCES
-            ${CMAKE_CURRENT_SOURCE_DIR}/private/src/*.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/private/src/*/*.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/private/src/*.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/private/src/*/*.cpp
 )
