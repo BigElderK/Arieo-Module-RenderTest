@@ -248,11 +248,12 @@ namespace Arieo
         std::vector<Base::Interface<Interface::RHI::IFramebuffer>> framebuffer_array;
         for(Base::Interface<Interface::RHI::IImageView> swapchain_image_view : render_swapchain->getImageViews())
         {
+            std::vector<Base::Interface<Interface::RHI::IImageView>> image_views{swapchain_image_view, depth_image->getImageView()};
             framebuffer_array.emplace_back(
                 render_device->createFramebuffer(
                     render_pipline, 
                     render_swapchain, 
-                    {swapchain_image_view, depth_image->getImageView()}
+                    image_views
                 )
             );
         }
@@ -339,11 +340,12 @@ namespace Arieo
                             framebuffer_array.clear();
                             for(Base::Interface<Interface::RHI::IImageView> swapchain_image_view : render_swapchain->getImageViews())
                             {
+                                std::vector<Base::Interface<Interface::RHI::IImageView>> image_views{swapchain_image_view, depth_image->getImageView()};
                                 framebuffer_array.emplace_back(
                                     render_device->createFramebuffer(
                                         render_pipline, 
                                         render_swapchain, 
-                                        {swapchain_image_view, depth_image->getImageView()}
+                                        image_views
                                     )
                                 );
                             }
