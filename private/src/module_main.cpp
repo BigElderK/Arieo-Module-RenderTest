@@ -63,7 +63,7 @@ namespace Arieo
             Core::Logger::trace("Window size: {}x{}", window->getWindowRect().size.x, window->getWindowRect().size.y);
 
             Core::Logger::trace("creating surface");
-            render_surface = render_instance->createSurface(window);
+            render_surface = render_instance->createSurface(window_manager, window);
             if(render_surface == nullptr)
             {
                 Core::Logger::error("Create render surface failed!");
@@ -498,7 +498,8 @@ namespace Arieo
         Core::Logger::trace("step_3");
         
         // no pararell task.
-        std::uint32_t ret = co_yield Core::Coroutine::YieldSubCoroutine([]() -> Core::Coroutine::CorHandle<std::uint32_t>
+        // std::uint32_t ret = 
+        co_yield Core::Coroutine::YieldSubCoroutine([]() -> Core::Coroutine::CorHandle<std::uint32_t>
         {
             co_yield std::suspend_always{};    
             Core::Logger::trace("step_3.1");
