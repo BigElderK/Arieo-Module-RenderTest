@@ -102,14 +102,17 @@ namespace Arieo
             content_archive = main_module->getRootArchive();
 
             Core::Logger::trace("loading shaders");
-            auto [vert_shader_buffer, vert_shader_size] = content_archive->getFileBuffer("content/shader/test_2.vert.hlsl.spv");
-            auto [frag_shader_buffer, frag_shader_size] = content_archive->getFileBuffer("content/shader/test_2.frag.hlsl.spv");
+            auto vert_shader_file = content_archive->aquireFileBuffer("content/shader/test_2.vert.hlsl.spv");
+            auto frag_shader_file = content_archive->aquireFileBuffer("content/shader/test_2.frag.hlsl.spv");
 
-            Core::Logger::trace("vert shader loaded: {}", vert_shader_size);
-            Core::Logger::trace("frag shader loaded: {}", frag_shader_size);
+            Core::Logger::trace("vert shader loaded: {}", vert_shader_file->getBufferSize());
+            Core::Logger::trace("frag shader loaded: {}", frag_shader_file->getBufferSize());
 
-            test_vert_shader = render_device->createShader(vert_shader_buffer, vert_shader_size);
-            test_frag_shader = render_device->createShader(frag_shader_buffer, frag_shader_size);
+            test_vert_shader = render_device->createShader(vert_shader_file->getBuffer(), vert_shader_file->getBufferSize());
+            test_frag_shader = render_device->createShader(frag_shader_file->getBuffer(), frag_shader_file->getBufferSize());
+
+            content_archive->releaseFileBuffer(vert_shader_file);
+            content_archive->releaseFileBuffer(frag_shader_file);
         
             command_pool = render_device->getGraphicsCommandQueue()->createCommandPool();
             descriptor_pool = render_device->createDescriptorPool(10);
@@ -138,8 +141,9 @@ namespace Arieo
 
         // Loading model
         Core::Logger::trace("loading model");
-        auto [model_file_buffer, model_file_buffer_size] = content_archive->getFileBuffer("content/model/viking_room.model.obj");
-        model_buffer = model_loader->loadObj(model_file_buffer, model_file_buffer_size);
+        auto model_file = content_archive->aquireFileBuffer("content/model/viking_room.model.obj");
+        model_buffer = model_loader->loadObj(model_file->getBuffer(), model_file->getBufferSize());
+        content_archive->releaseFileBuffer(model_file);
 
         // Create vertext buffer
         Core::Logger::trace("creating vertext buffer");
@@ -180,8 +184,9 @@ namespace Arieo
         Core::Logger::trace("index memory copying end");
 
         Core::Logger::trace("loading texture image");
-        auto [image_file_buffer, image_file_size] = content_archive->getFileBuffer("content/model/viking_room.dds");
-        Interface::FileLoader::ImageBuffer image_buffer = image_loader->loadDDS(image_file_buffer, image_file_size);
+        auto image_file = content_archive->aquireFileBuffer("content/model/viking_room.dds");
+        Interface::FileLoader::ImageBuffer image_buffer = image_loader->loadDDS(image_file->getBuffer(), image_file->getBufferSize());
+        content_archive->releaseFileBuffer(image_file);
         Core::Logger::trace("Texture file loaded {} {} {}", image_buffer.m_width, image_buffer.m_height, (std::uint32_t)image_buffer.m_format);
 
         Core::Logger::trace("creating texture image");
