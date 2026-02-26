@@ -121,34 +121,16 @@ namespace Arieo
         const size_t max_frames_in_flight = 3;
 
 
-        Interface::FileLoader::ModelBuffer model_buffer;
-        // model_buffer.m_vertices = {
-        //     {{-0.5f, 0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-        //     {{0.5f, 0.0f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-        //     {{0.5f, 0.0f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-        //     {{-0.5f, 0.0f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
-
-        //     {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-        //     {{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-        //     {{0.5f, -0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-        //     {{-0.5f, -0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
-        // };
-        // model_buffer.m_indices = 
-        // {
-        //     2, 1, 0, 0, 3, 2,
-        //     6, 5, 4, 4, 7, 6
-        // };
-
         // Loading model
         Core::Logger::trace("loading model");
         auto model_file = content_archive->aquireFileBuffer("content/model/viking_room.model.obj");
-        model_buffer = model_loader->loadObj(model_file->getBuffer(), model_file->getBufferSize());
+        auto model_buffer = model_loader->loadObj(model_file->getBuffer(), model_file->getBufferSize());
         content_archive->releaseFileBuffer(model_file);
 
         // Create vertext buffer
         Core::Logger::trace("creating vertext buffer");
         Base::Interface<Interface::RHI::IBuffer> vertex_buffer = render_device->createBuffer(
-            sizeof(model_buffer.m_vertices[0]) * model_buffer.m_vertices.size(),
+            sizeof(Interface::FileLoader::ModelVertex) * model_buffer->getVertexCount(),
             Interface::RHI::BufferUsageBitFlags::VERTEX | Interface::RHI::BufferUsageBitFlags::TRANSFER_DST, 
             Interface::RHI::BufferAllocationFlags::CREATE_DEDICATED_MEMORY_BIT,
             Interface::RHI::MemoryUsage::AUTO_PREFER_DEVICE
@@ -157,7 +139,7 @@ namespace Arieo
         // Create index buffer
         Core::Logger::trace("creating index buffer");
         Base::Interface<Interface::RHI::IBuffer> index_buffer = render_device->createBuffer(
-            sizeof(model_buffer.m_vertices[0]) * model_buffer.m_vertices.size(),
+            sizeof(Interface::FileLoader::ModelVertex) * model_buffer->getVertexCount(),
             Interface::RHI::BufferUsageBitFlags::INDEX | Interface::RHI::BufferUsageBitFlags::TRANSFER_DST, 
             Interface::RHI::BufferAllocationFlags::CREATE_DEDICATED_MEMORY_BIT | Interface::RHI::BufferAllocationFlags::CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT,
             Interface::RHI::MemoryUsage::AUTO_PREFER_DEVICE
@@ -165,7 +147,7 @@ namespace Arieo
 
         Core::Logger::trace("creating staging buffer");
         Base::Interface<Interface::RHI::IBuffer> staging_vertext_buffer = render_device->createBuffer(
-            sizeof(model_buffer.m_vertices[0]) * model_buffer.m_vertices.size(),
+            sizeof(Interface::FileLoader::ModelVertex) * model_buffer->getVertexCount(),
             Interface::RHI::BufferUsageBitFlags::TRANSFER_SRC, 
             Interface::RHI::BufferAllocationFlags::CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT, 
             Interface::RHI::MemoryUsage::AUTO_PREFER_HOST
@@ -173,15 +155,19 @@ namespace Arieo
 
         Core::Logger::trace("vertext memory copying start");
         void* mapped_staging_vertext_mem = staging_vertext_buffer->mapMemory(0, 0);
-        memcpy(mapped_staging_vertext_mem, model_buffer.m_vertices.data(), (size_t) sizeof(model_buffer.m_vertices[0]) * model_buffer.m_vertices.size());
+        memcpy(mapped_staging_vertext_mem, model_buffer->getVertices(), sizeof(Interface::FileLoader::ModelVertex) * model_buffer->getVertexCount());
         staging_vertext_buffer->unmapMemory();
         Core::Logger::trace("vertext memory copying end");
 
         Core::Logger::trace("index memory copying start");
         void* mapped_index_vertext_mem = index_buffer->mapMemory(0, 0);
-        memcpy(mapped_index_vertext_mem, model_buffer.m_indices.data(), (size_t) sizeof(model_buffer.m_indices[0]) * model_buffer.m_indices.size());
+        memcpy(mapped_index_vertext_mem, model_buffer->getIndices(), sizeof(uint16_t) * model_buffer->getIndexCount());
         index_buffer->unmapMemory();
         Core::Logger::trace("index memory copying end");
+
+        size_t model_vertex_count = model_buffer->getVertexCount();
+        size_t model_index_count = model_buffer->getIndexCount();
+        model_loader->unloadObj(model_buffer);
 
         Core::Logger::trace("loading texture image");
         auto image_file = content_archive->aquireFileBuffer("content/model/viking_room.dds");
@@ -414,7 +400,7 @@ namespace Arieo
                     {
                         frame_context.m_command_buffer->begin();
                         
-                        frame_context.m_command_buffer->copyBuffer(staging_vertext_buffer, vertex_buffer, sizeof(model_buffer.m_vertices[0]) * model_buffer.m_vertices.size());
+                        frame_context.m_command_buffer->copyBuffer(staging_vertext_buffer, vertex_buffer, sizeof(Interface::FileLoader::ModelVertex) * model_vertex_count);
 
                         frame_context.m_command_buffer->beginRenderPass(render_pipline, framebuffer_array[cur_framebuffer_index]);
                         frame_context.m_command_buffer->bindPipeline(render_pipline);
@@ -424,7 +410,7 @@ namespace Arieo
                         frame_context.m_command_buffer->bindDescriptorSets(render_pipline, frame_context.m_descriptor_set);
 
                         //frame_context.m_command_buffer->draw(static_cast<uint32_t>(vertices.size()), 1, 0, 0);
-                        frame_context.m_command_buffer->drawIndexed(static_cast<uint32_t>(model_buffer.m_indices.size()), 1, 0, 0, 0);
+                        frame_context.m_command_buffer->drawIndexed(static_cast<uint32_t>(model_index_count), 1, 0, 0, 0);
                         
                         frame_context.m_command_buffer->endRenderPass();
                         frame_context.m_command_buffer->end();
