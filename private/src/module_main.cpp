@@ -11,11 +11,11 @@ namespace Arieo
 {
     Core::Coroutine::CorHandle<void> renderTestCoroutine()
     {
-        Base::InteropOld<Interface::Main::IMainModule> main_module = Core::ModuleManager::getInterface<Interface::Main::IMainModule>();
-        Base::InteropOld<Interface::Window::IWindowManager> window_manager = Core::ModuleManager::getInterface<Interface::Window::IWindowManager>();
-        Base::InteropOld<Interface::RHI::IRenderInstance> render_instance = Core::ModuleManager::getInterface<Interface::RHI::IRenderInstance>();
-        Base::InteropOld<Interface::FileLoader::IImageLoader> image_loader = Core::ModuleManager::getInterface<Interface::FileLoader::IImageLoader>();
-        Base::InteropOld<Interface::FileLoader::IModelLoader> model_loader = Core::ModuleManager::getInterface<Interface::FileLoader::IModelLoader>();
+        Base::Interop::RawRef<Interface::Main::IMainModule> main_module = Core::ModuleManager::getInterface<Interface::Main::IMainModule>();
+        Base::Interop::RawRef<Interface::Window::IWindowManager> window_manager = Core::ModuleManager::getInterface<Interface::Window::IWindowManager>();
+        Base::Interop::RawRef<Interface::RHI::IRenderInstance> render_instance = Core::ModuleManager::getInterface<Interface::RHI::IRenderInstance>();
+        Base::Interop::RawRef<Interface::FileLoader::IImageLoader> image_loader = Core::ModuleManager::getInterface<Interface::FileLoader::IImageLoader>();
+        Base::Interop::RawRef<Interface::FileLoader::IModelLoader> model_loader = Core::ModuleManager::getInterface<Interface::FileLoader::IModelLoader>();
 
         co_yield Core::Coroutine::YieldUntil([&]() -> bool
         {
@@ -28,19 +28,19 @@ namespace Arieo
         });
 
         // initialize
-        Base::InteropOld<Interface::Window::IWindow> window = nullptr;
+        Base::Interop::RawRef<Interface::Window::IWindow> window = nullptr;
         Base::Interop::SharedRef<Interface::Archive::IArchive> content_archive = nullptr;
 
-        Base::InteropOld<Interface::RHI::IRenderDevice> render_device = nullptr;
-        Base::InteropOld<Interface::RHI::IRenderSurface> render_surface = nullptr;
-        Base::InteropOld<Interface::RHI::ISwapchain> render_swapchain = nullptr;
-        Base::InteropOld<Interface::RHI::IShader> test_vert_shader = nullptr;
-        Base::InteropOld<Interface::RHI::IShader> test_frag_shader = nullptr;
-        Base::InteropOld<Interface::RHI::IPipeline> render_pipline = nullptr;
-        Base::InteropOld<Interface::RHI::ICommandPool> command_pool = nullptr;
-        Base::InteropOld<Interface::RHI::IDescriptorPool> descriptor_pool = nullptr;
-        Base::InteropOld<Interface::RHI::IImage> texture_image = nullptr;
-        Base::InteropOld<Interface::RHI::IImage> depth_image = nullptr;
+        Base::Interop::RawRef<Interface::RHI::IRenderDevice> render_device = nullptr;
+        Base::Interop::RawRef<Interface::RHI::IRenderSurface> render_surface = nullptr;
+        Base::Interop::RawRef<Interface::RHI::ISwapchain> render_swapchain = nullptr;
+        Base::Interop::RawRef<Interface::RHI::IShader> test_vert_shader = nullptr;
+        Base::Interop::RawRef<Interface::RHI::IShader> test_frag_shader = nullptr;
+        Base::Interop::RawRef<Interface::RHI::IPipeline> render_pipline = nullptr;
+        Base::Interop::RawRef<Interface::RHI::ICommandPool> command_pool = nullptr;
+        Base::Interop::RawRef<Interface::RHI::IDescriptorPool> descriptor_pool = nullptr;
+        Base::Interop::RawRef<Interface::RHI::IImage> texture_image = nullptr;
+        Base::Interop::RawRef<Interface::RHI::IImage> depth_image = nullptr;
         {
             Core::Logger::trace("Getting main window");
             {
@@ -130,7 +130,7 @@ namespace Arieo
 
         // Create vertext buffer
         Core::Logger::trace("creating vertext buffer");
-        Base::InteropOld<Interface::RHI::IBuffer> vertex_buffer = render_device->createBuffer(
+        Base::Interop::RawRef<Interface::RHI::IBuffer> vertex_buffer = render_device->createBuffer(
             sizeof(Interface::FileLoader::ModelVertex) * model_buffer->getVertexCount(),
             Interface::RHI::BufferUsageBitFlags::VERTEX | Interface::RHI::BufferUsageBitFlags::TRANSFER_DST, 
             Interface::RHI::BufferAllocationFlags::CREATE_DEDICATED_MEMORY_BIT,
@@ -139,7 +139,7 @@ namespace Arieo
 
         // Create index buffer
         Core::Logger::trace("creating index buffer");
-        Base::InteropOld<Interface::RHI::IBuffer> index_buffer = render_device->createBuffer(
+        Base::Interop::RawRef<Interface::RHI::IBuffer> index_buffer = render_device->createBuffer(
             sizeof(Interface::FileLoader::ModelVertex) * model_buffer->getVertexCount(),
             Interface::RHI::BufferUsageBitFlags::INDEX | Interface::RHI::BufferUsageBitFlags::TRANSFER_DST, 
             Interface::RHI::BufferAllocationFlags::CREATE_DEDICATED_MEMORY_BIT | Interface::RHI::BufferAllocationFlags::CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT,
@@ -147,7 +147,7 @@ namespace Arieo
         );
 
         Core::Logger::trace("creating staging buffer");
-        Base::InteropOld<Interface::RHI::IBuffer> staging_vertext_buffer = render_device->createBuffer(
+        Base::Interop::RawRef<Interface::RHI::IBuffer> staging_vertext_buffer = render_device->createBuffer(
             sizeof(Interface::FileLoader::ModelVertex) * model_buffer->getVertexCount(),
             Interface::RHI::BufferUsageBitFlags::TRANSFER_SRC, 
             Interface::RHI::BufferAllocationFlags::CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT, 
@@ -172,7 +172,7 @@ namespace Arieo
 
         Core::Logger::trace("loading texture image");
         auto image_file = content_archive->aquireFileBuffer("content/model/viking_room.dds");
-        Interface::FileLoader::ImageBuffer image_buffer = image_loader->loadDDS(Base::InteropOld<Base::IBufferView>(image_file->getBuffer(), image_file->getBufferSize()));
+        Interface::FileLoader::ImageBuffer image_buffer = image_loader->loadDDS(image_file->getBuffer(), image_file->getBufferSize());
         Core::Logger::trace("Texture file loaded {} {} {}", image_buffer.m_width, image_buffer.m_height, (std::uint32_t)image_buffer.m_format);
 
         Core::Logger::trace("creating texture image");
@@ -208,7 +208,7 @@ namespace Arieo
         );
 
         Core::Logger::trace("creating texture stage buffer");
-        Base::InteropOld<Interface::RHI::IBuffer> staging_image_buffer = render_device->createBuffer(
+        Base::Interop::RawRef<Interface::RHI::IBuffer> staging_image_buffer = render_device->createBuffer(
             image_buffer.m_size,
             Interface::RHI::BufferUsageBitFlags::TRANSFER_SRC, 
             Interface::RHI::BufferAllocationFlags::CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT, 
@@ -219,7 +219,7 @@ namespace Arieo
         staging_image_buffer->unmapMemory();
         // content_archive->releaseFileBuffer(image_file);
 
-        Base::InteropOld<Interface::RHI::ICommandBuffer> image_copy_command_buffer = command_pool->allocateCommandBuffer();
+        Base::Interop::RawRef<Interface::RHI::ICommandBuffer> image_copy_command_buffer = command_pool->allocateCommandBuffer();
         image_copy_command_buffer->begin();
         image_copy_command_buffer->copyBufferToImage(staging_image_buffer, texture_image);
         image_copy_command_buffer->prepareDepthImage(depth_image);
@@ -237,10 +237,10 @@ namespace Arieo
         );
 
         // Create framebuffer
-        std::vector<Base::InteropOld<Interface::RHI::IFramebuffer>> framebuffer_array;
-        for(Base::InteropOld<Interface::RHI::IImageView> swapchain_image_view : render_swapchain->getImageViews())
+        std::vector<Base::Interop::RawRef<Interface::RHI::IFramebuffer>> framebuffer_array;
+        for(Base::Interop::RawRef<Interface::RHI::IImageView> swapchain_image_view : render_swapchain->getImageViews())
         {
-            std::vector<Base::InteropOld<Interface::RHI::IImageView>> image_views{swapchain_image_view, depth_image->getImageView()};
+            std::vector<Base::Interop::RawRef<Interface::RHI::IImageView>> image_views{swapchain_image_view, depth_image->getImageView()};
             framebuffer_array.emplace_back(
                 render_device->createFramebuffer(
                     render_pipline, 
@@ -262,13 +262,13 @@ namespace Arieo
             };
 
             UniformBufferObject m_uniform_obj;
-            Base::InteropOld<Interface::RHI::IDescriptorSet> m_descriptor_set = nullptr;
+            Base::Interop::RawRef<Interface::RHI::IDescriptorSet> m_descriptor_set = nullptr;
 
-            Base::InteropOld<Interface::RHI::IBuffer> m_uniform_buffer = nullptr;
-            Base::InteropOld<Interface::RHI::IFence> m_fence = nullptr;
-            Base::InteropOld<Interface::RHI::ISemaphore> m_image_availiable_semaphore = nullptr;
-            Base::InteropOld<Interface::RHI::ISemaphore> m_render_finished_semaphore = nullptr;        
-            Base::InteropOld<Interface::RHI::ICommandBuffer> m_command_buffer = nullptr;
+            Base::Interop::RawRef<Interface::RHI::IBuffer> m_uniform_buffer = nullptr;
+            Base::Interop::RawRef<Interface::RHI::IFence> m_fence = nullptr;
+            Base::Interop::RawRef<Interface::RHI::ISemaphore> m_image_availiable_semaphore = nullptr;
+            Base::Interop::RawRef<Interface::RHI::ISemaphore> m_render_finished_semaphore = nullptr;        
+            Base::Interop::RawRef<Interface::RHI::ICommandBuffer> m_command_buffer = nullptr;
         };
         std::vector<FrameContext> frame_context_array(max_frames_in_flight);
 
@@ -325,14 +325,14 @@ namespace Arieo
                             render_device->waitIdle();
                             render_swapchain = render_device->createSwapchain(render_surface);
 
-                            for(Base::InteropOld<Interface::RHI::IFramebuffer> frame_buffer : framebuffer_array)
+                            for(Base::Interop::RawRef<Interface::RHI::IFramebuffer> frame_buffer : framebuffer_array)
                             {
                                 render_device->destroyFramebuffer(frame_buffer);
                             }
                             framebuffer_array.clear();
-                            for(Base::InteropOld<Interface::RHI::IImageView> swapchain_image_view : render_swapchain->getImageViews())
+                            for(Base::Interop::RawRef<Interface::RHI::IImageView> swapchain_image_view : render_swapchain->getImageViews())
                             {
-                                std::vector<Base::InteropOld<Interface::RHI::IImageView>> image_views{swapchain_image_view, depth_image->getImageView()};
+                                std::vector<Base::Interop::RawRef<Interface::RHI::IImageView>> image_views{swapchain_image_view, depth_image->getImageView()};
                                 framebuffer_array.emplace_back(
                                     render_device->createFramebuffer(
                                         render_pipline, 
@@ -450,7 +450,7 @@ namespace Arieo
 
         // finalilze
         {
-            for(Base::InteropOld<Interface::RHI::IFramebuffer> frame_buffer : framebuffer_array)
+            for(Base::Interop::RawRef<Interface::RHI::IFramebuffer> frame_buffer : framebuffer_array)
             {
                 render_device->destroyFramebuffer(frame_buffer);
             }
@@ -579,7 +579,7 @@ namespace Arieo
         {
             DllLoader()
             {
-                Base::InteropOld<Interface::Main::IMainModule> main_module = Core::ModuleManager::getInterface<Interface::Main::IMainModule>();
+                Base::Interop::RawRef<Interface::Main::IMainModule> main_module = Core::ModuleManager::getInterface<Interface::Main::IMainModule>();
                 main_module->enqueueTask(
                     Core::Coroutine::Task::generatorTasklet(renderTestCoroutine())
                 );
@@ -591,3 +591,7 @@ namespace Arieo
         } dll_loader;
     }
 }
+
+
+
+
