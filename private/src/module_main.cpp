@@ -125,7 +125,7 @@ namespace Arieo
         Core::Logger::trace("loading model");
         
         auto model_file = content_archive->aquireFileBuffer("content/model/viking_room.model.obj");
-        auto model_buffer = model_loader->loadObj(model_file->getBuffer(), model_file->getBufferSize());
+        auto model_buffer = model_loader->loadObj(model_file);
         
 
         // Create vertext buffer
@@ -168,7 +168,6 @@ namespace Arieo
 
         size_t model_vertex_count = model_buffer->getVertexCount();
         size_t model_index_count = model_buffer->getIndexCount();
-        model_loader->unloadObj(model_buffer);
 
         Core::Logger::trace("loading texture image");
         auto image_file = content_archive->aquireFileBuffer("content/model/viking_room.dds");
