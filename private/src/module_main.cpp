@@ -172,13 +172,13 @@ namespace Arieo
 
         Core::Logger::trace("loading texture image");
         auto image_file = content_archive->aquireFileBuffer("content/model/viking_room.dds");
-        Interface::FileLoader::ImageBuffer image_buffer = image_loader->loadDDS(image_file->getBuffer(), image_file->getBufferSize());
-        Core::Logger::trace("Texture file loaded {} {} {}", image_buffer.m_width, image_buffer.m_height, (std::uint32_t)image_buffer.m_format);
+        Base::Interop::SharedRef<Interface::FileLoader::IImageBuffer> image_buffer = image_loader->loadDDS(image_file);
+        Core::Logger::trace("Texture file loaded {} {} {}", image_buffer->getWidth(), image_buffer->getHeight(), (std::uint32_t)image_buffer->getFormat());
 
         Core::Logger::trace("creating texture image");
         texture_image = render_device->createImage(
-            image_buffer.m_width, image_buffer.m_height, 
-            image_buffer.m_format,
+            image_buffer->getWidth(), image_buffer->getHeight(), 
+            image_buffer->getFormat(),
             Interface::RHI::ImageAspectFlags::COLOR_BIT,
             Interface::RHI::ImageTiling::OPTIMAL,
             Interface::RHI::ImageUsageFlags::SAMPLED_BIT | Interface::RHI::ImageUsageFlags::TRANSFER_DST_BIT,
@@ -209,13 +209,13 @@ namespace Arieo
 
         Core::Logger::trace("creating texture stage buffer");
         Base::Interop::RawRef<Interface::RHI::IBuffer> staging_image_buffer = render_device->createBuffer(
-            image_buffer.m_size,
+            image_buffer->getSize(),
             Interface::RHI::BufferUsageBitFlags::TRANSFER_SRC, 
             Interface::RHI::BufferAllocationFlags::CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT, 
             Interface::RHI::MemoryUsage::AUTO_PREFER_HOST
         );
-        void* staging_image_staged_buffer = staging_image_buffer->mapMemory(0, image_buffer.m_size);
-        memcpy(staging_image_staged_buffer, image_buffer.m_buffer, image_buffer.m_size);
+        void* staging_image_staged_buffer = staging_image_buffer->mapMemory(0, image_buffer->getSize());
+        memcpy(staging_image_staged_buffer, image_buffer->getBuffer(), image_buffer->getSize());
         staging_image_buffer->unmapMemory();
         // content_archive->releaseFileBuffer(image_file);
 
