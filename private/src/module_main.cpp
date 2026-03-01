@@ -11,12 +11,12 @@ namespace Arieo
 {
     Core::Coroutine::CorHandle<void> renderTestCoroutine()
     {
-        Base::Interop::RawRef<Interface::Main::IMainModule> main_module = Core::ModuleManager::getInterface<Interface::Main::IMainModule>();
-        Base::Interop::RawRef<Interface::Window::IWindowManager> window_manager = Core::ModuleManager::getInterface<Interface::Window::IWindowManager>();
-        Base::Interop::RawRef<Interface::RHI::IRenderInstance> render_instance = Core::ModuleManager::getInterface<Interface::RHI::IRenderInstance>();
-        Base::Interop::RawRef<Interface::FileLoader::IImageLoader> image_loader = Core::ModuleManager::getInterface<Interface::FileLoader::IImageLoader>();
-        Base::Interop::RawRef<Interface::FileLoader::IModelLoader> model_loader = Core::ModuleManager::getInterface<Interface::FileLoader::IModelLoader>();
-
+        Base::Interop::SharedRef<Interface::Main::IMainModule> main_module = Core::ModuleManager::getInterface<Interface::Main::IMainModule>();
+        Base::Interop::SharedRef<Interface::Window::IWindowManager> window_manager = Core::ModuleManager::getInterface<Interface::Window::IWindowManager>();
+        Base::Interop::SharedRef<Interface::RHI::IRenderInstance> render_instance = Core::ModuleManager::getInterface<Interface::RHI::IRenderInstance>();
+        Base::Interop::SharedRef<Interface::FileLoader::IImageLoader> image_loader = Core::ModuleManager::getInterface<Interface::FileLoader::IImageLoader>();
+        Base::Interop::SharedRef<Interface::FileLoader::IModelLoader> model_loader = Core::ModuleManager::getInterface<Interface::FileLoader::IModelLoader>();
+        
         co_yield Core::Coroutine::YieldUntil([&]() -> bool
         {
             Core::Logger::trace("Waiting for required interfaces...");
@@ -63,7 +63,7 @@ namespace Arieo
             Core::Logger::trace("Window size: {}x{}", window->getWindowRect().size.x, window->getWindowRect().size.y);
 
             Core::Logger::trace("creating surface");
-            render_surface = render_instance->createSurface(window_manager, window);
+            render_surface = render_instance->createSurface(Base::Interop::RawRef<Interface::Window::IWindowManager>(window_manager), window);
             if(render_surface == nullptr)
             {
                 Core::Logger::error("Create render surface failed!");
@@ -514,7 +514,7 @@ namespace Arieo
 
         // Core::Logger::trace("step_3 return {}", ret);
 
-        std::uint64_t ret_value = co_yield Core::Coroutine::YieldUpdateOnce<std::uint64_t>(
+        /*std::uint64_t ret_value =*/ co_yield Core::Coroutine::YieldUpdateOnce<std::uint64_t>(
             [](Core::Coroutine::Task& running_task) -> std::uint64_t
             {
                 return 123;
@@ -578,7 +578,7 @@ namespace Arieo
         {
             DllLoader()
             {
-                Base::Interop::RawRef<Interface::Main::IMainModule> main_module = Core::ModuleManager::getInterface<Interface::Main::IMainModule>();
+                Base::Interop::SharedRef<Interface::Main::IMainModule> main_module = Core::ModuleManager::getInterface<Interface::Main::IMainModule>();
                 main_module->enqueueTask(
                     Core::Coroutine::Task::generatorTasklet(renderTestCoroutine())
                 );
