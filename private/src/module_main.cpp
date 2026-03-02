@@ -74,13 +74,13 @@ namespace Arieo
             auto hardware_informations = render_instance->getHardwareInfomations();
 
             int selected_device_index = 0;
-            for(int i = 0; i < hardware_informations.size(); i++)
+            for(int i = 0; i < hardware_informations->getItemCount(); i++)
             {
-                if(hardware_informations[i].find("MultiViewport: Yes") != std::string::npos)
+                if(std::string(hardware_informations->getItem(i)).find("MultiViewport: Yes") != std::string::npos)
                 {
                     selected_device_index = i;
                 }
-                Core::Logger::trace("Render Hardware Device found:\r\n{}", hardware_informations[i]);
+                Core::Logger::trace("Render Hardware Device found:\r\n{}", std::string(hardware_informations->getItem(i)));
             }
 
             render_device = render_instance->createDevice(selected_device_index, render_surface);
@@ -105,11 +105,11 @@ namespace Arieo
             auto vert_shader_file = content_archive->aquireFileBuffer("content/shader/test_2.vert.hlsl.spv");
             auto frag_shader_file = content_archive->aquireFileBuffer("content/shader/test_2.frag.hlsl.spv");
 
-            Core::Logger::trace("vert shader loaded: {}", vert_shader_file->getBufferSize());
-            Core::Logger::trace("frag shader loaded: {}", frag_shader_file->getBufferSize());
+            Core::Logger::trace("vert shader loaded: {}", vert_shader_file->getDataSize());
+            Core::Logger::trace("frag shader loaded: {}", frag_shader_file->getDataSize());
 
-            test_vert_shader = render_device->createShader(vert_shader_file->getBuffer(), vert_shader_file->getBufferSize());
-            test_frag_shader = render_device->createShader(frag_shader_file->getBuffer(), frag_shader_file->getBufferSize());
+            test_vert_shader = render_device->createShader(vert_shader_file->getData(), vert_shader_file->getDataSize());
+            test_frag_shader = render_device->createShader(frag_shader_file->getData(), frag_shader_file->getDataSize());
 
             // content_archive->releaseFileBuffer(vert_shader_file);
             // content_archive->releaseFileBuffer(frag_shader_file);
@@ -231,14 +231,15 @@ namespace Arieo
         render_pipline = render_device->createPipeline(
             test_vert_shader, 
             test_frag_shader, 
-            render_swapchain->getImageViews()[0],
+            render_swapchain->getImageView(0),
             depth_image->getImageView()
         );
 
         // Create framebuffer
         std::vector<Base::Interop::RawRef<Interface::RHI::IFramebuffer>> framebuffer_array;
-        for(Base::Interop::RawRef<Interface::RHI::IImageView> swapchain_image_view : render_swapchain->getImageViews())
+        for(size_t i = 0; i < render_swapchain->getImageCount(); ++i)
         {
+            Base::Interop::RawRef<Interface::RHI::IImageView> swapchain_image_view = render_swapchain->getImageView(i);
             std::vector<Base::Interop::RawRef<Interface::RHI::IImageView>> image_views{swapchain_image_view, depth_image->getImageView()};
             framebuffer_array.emplace_back(
                 render_device->createFramebuffer(
@@ -329,8 +330,9 @@ namespace Arieo
                                 render_device->destroyFramebuffer(frame_buffer);
                             }
                             framebuffer_array.clear();
-                            for(Base::Interop::RawRef<Interface::RHI::IImageView> swapchain_image_view : render_swapchain->getImageViews())
+                            for(size_t i = 0; i < render_swapchain->getImageCount(); ++i)
                             {
+                                Base::Interop::RawRef<Interface::RHI::IImageView> swapchain_image_view = render_swapchain->getImageView(i);
                                 std::vector<Base::Interop::RawRef<Interface::RHI::IImageView>> image_views{swapchain_image_view, depth_image->getImageView()};
                                 framebuffer_array.emplace_back(
                                     render_device->createFramebuffer(
